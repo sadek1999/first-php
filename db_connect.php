@@ -1,8 +1,8 @@
 <?php
 
 $servername = "localhost";
-$username = "user";
-$password = "password";
+$username = "root";
+$password = '';
 $dbname = "todo_app";
 
 // Create connection
