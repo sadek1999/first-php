@@ -127,6 +127,33 @@
 <div class="container">
     <h2>Task Management System</h2>
 
+    <!-- View All Tasks at the top -->
+    <h3>All Tasks</h3>
+    <?php
+    include 'db_connect.php';
+
+    // Fetch all tasks
+    $sql = "SELECT * FROM tasks";
+    $result = $conn->query($sql);
+
+    if ($result->num_rows > 0) {
+        echo '<table>';
+        echo '<tr><th>ID</th><th>Title</th><th>Description</th><th>Status</th><th>Created At</th></tr>';
+        while ($row = $result->fetch_assoc()) {
+            echo '<tr>';
+            echo '<td>' . $row['id'] . '</td>';
+            echo '<td>' . $row['title'] . '</td>';
+            echo '<td>' . $row['description'] . '</td>';
+            echo '<td>' . $row['status'] . '</td>';
+            echo '<td>' . $row['created_at'] . '</td>';
+            echo '</tr>';
+        }
+        echo '</table>';
+    } else {
+        echo "<p class='message'>No tasks found.</p>";
+    }
+    ?>
+
     <!-- Add Task Form -->
     <div class="form-container">
         <h3>Add a New Task</h3>
@@ -136,10 +163,7 @@
             <button type="submit" name="add_task">Add Task</button>
         </form>
 
-        <!-- PHP code for task management logic -->
         <?php
-        include 'db_connect.php';
-
         // Handle Add Task Submission
         if (isset($_POST['add_task'])) {
             $title = $_POST['title'];
@@ -224,31 +248,11 @@
             $stmt->close();
         }
         ?>
+
     </div>
 
-    <!-- View All Tasks -->
-    <h3>All Tasks</h3>
     <?php
-    $sql = "SELECT * FROM tasks";
-    $result = $conn->query($sql);
-
-    if ($result->num_rows > 0) {
-        echo '<table>';
-        echo '<tr><th>ID</th><th>Title</th><th>Description</th><th>Status</th><th>Created At</th></tr>';
-        while ($row = $result->fetch_assoc()) {
-            echo '<tr>';
-            echo '<td>' . $row['id'] . '</td>';
-            echo '<td>' . $row['title'] . '</td>';
-            echo '<td>' . $row['description'] . '</td>';
-            echo '<td>' . $row['status'] . '</td>';
-            echo '<td>' . $row['created_at'] . '</td>';
-            echo '</tr>';
-        }
-        echo '</table>';
-    } else {
-        echo "<p class='message'>No tasks found.</p>";
-    }
-
+    // Close the connection
     $conn->close();
     ?>
 </div>
