@@ -5,28 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Task Management System</title>
     <style>
+        /* Reset default styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
+            font-family: 'Roboto', sans-serif;
+            background-color: #e9ecef;
             padding: 20px;
+            color: #495057;
         }
 
         .container {
-            max-width: 800px;
+            max-width: 960px;
             margin: 0 auto;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
         }
 
         h2 {
             text-align: center;
-            color: #333;
+            color: #343a40;
+            font-size: 2rem;
+            margin-bottom: 20px;
         }
 
         .form-container {
-            margin-bottom: 20px;
+            margin-bottom: 40px;
         }
 
         input[type="text"],
@@ -34,24 +44,27 @@
         input[type="number"],
         select {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 1rem;
         }
 
         button {
             width: 100%;
-            padding: 10px;
-            background-color: #007bff; /* Bootstrap primary color */
-            color: white;
+            padding: 12px;
+            background-color: #17a2b8; /* Bootstrap info color */
+            color: #ffffff;
             border: none;
-            border-radius: 4px;
+            border-radius: 5px;
+            font-size: 1.1rem;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
 
         button:hover {
-            background-color: #0056b3; /* Darker shade for hover effect */
+            background-color: #138496; /* Darker shade for hover effect */
         }
 
         table {
@@ -61,18 +74,18 @@
         }
 
         th, td {
-            padding: 10px;
+            padding: 12px;
             text-align: left;
-            border: 1px solid #ccc;
+            border: 1px solid #dee2e6;
         }
 
         th {
-            background-color: #007bff; /* Bootstrap primary color */
-            color: white;
+            background-color: #17a2b8; /* Bootstrap info color */
+            color: #ffffff;
         }
 
         tr:nth-child(even) {
-            background-color: #f2f2f2;
+            background-color: #f8f9fa;
         }
 
         .message {
@@ -82,11 +95,30 @@
         }
 
         .message.success {
-            color: green;
+            color: #28a745;
         }
 
         .message.error {
-            color: red;
+            color: #dc3545;
+        }
+
+        /* Media Query for smaller screens */
+        @media (max-width: 768px) {
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            input[type="text"], textarea, input[type="number"], select {
+                font-size: 0.9rem;
+            }
+
+            button {
+                font-size: 1rem;
+            }
+
+            th, td {
+                padding: 8px;
+            }
         }
     </style>
 </head>
@@ -104,26 +136,25 @@
             <button type="submit" name="add_task">Add Task</button>
         </form>
 
+        <!-- PHP code for task management logic -->
         <?php
-        include 'db_connect.php'; // Ensure db_connect.php is included
+        include 'db_connect.php';
 
         // Handle Add Task Submission
         if (isset($_POST['add_task'])) {
             $title = $_POST['title'];
             $description = $_POST['description'];
 
-            // Use prepared statements for security
+            // Prepared statement for security
             $stmt = $conn->prepare("INSERT INTO tasks (title, description, status) VALUES (?, ?, 'pending')");
             $stmt->bind_param("ss", $title, $description);
 
-            // Execute the query and check for errors
             if ($stmt->execute()) {
                 echo "<p class='message success'>New task created successfully!</p>";
             } else {
                 echo "<p class='message error'>Error: " . $stmt->error . "</p>";
             }
 
-            // Close the statement
             $stmt->close();
         }
         ?>
@@ -146,14 +177,13 @@
         </form>
 
         <?php
-        // Handle Update Task Submission
+        // Handle Update Task
         if (isset($_POST['update_task'])) {
             $id = $_POST['update_id'];
             $title = $_POST['update_title'];
             $description = $_POST['update_description'];
             $status = $_POST['update_status'];
 
-            // Update the task in the database
             $sql = "UPDATE tasks SET title=?, description=?, status=? WHERE id=?";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("sssi", $title, $description, $status, $id);
@@ -163,8 +193,7 @@
             } else {
                 echo "<p class='message error'>Error updating task: " . $stmt->error . "</p>";
             }
-            
-            // Close the statement
+
             $stmt->close();
         }
         ?>
@@ -179,21 +208,19 @@
         </form>
 
         <?php
-        // Handle Delete Task Submission
         if (isset($_POST['delete_task'])) {
             $id = $_POST['delete_id'];
 
             $sql = "DELETE FROM tasks WHERE id=?";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("i", $id);
-            
+
             if ($stmt->execute()) {
                 echo "<p class='message success'>Task deleted successfully</p>";
             } else {
                 echo "<p class='message error'>Error deleting task: " . $stmt->error . "</p>";
             }
-            
-            // Close the statement
+
             $stmt->close();
         }
         ?>
@@ -202,12 +229,10 @@
     <!-- View All Tasks -->
     <h3>All Tasks</h3>
     <?php
-    // Fetch all tasks
     $sql = "SELECT * FROM tasks";
     $result = $conn->query($sql);
 
     if ($result->num_rows > 0) {
-        // Display tasks in a table
         echo '<table>';
         echo '<tr><th>ID</th><th>Title</th><th>Description</th><th>Status</th><th>Created At</th></tr>';
         while ($row = $result->fetch_assoc()) {
@@ -224,7 +249,6 @@
         echo "<p class='message'>No tasks found.</p>";
     }
 
-    // Close the connection
     $conn->close();
     ?>
 </div>
